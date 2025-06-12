@@ -19,7 +19,7 @@ type CoinData = {
 
 export default function Portfolio() {
   const [portfolio, setPortfolio] = useState<CoinData>({});
-  const [currentPrices, setCurrentPrices] = useState<{ [coinId: string]: { usd: number } }>({});
+const [currentPrices, setCurrentPrices] = useState<{ [coinId: string]: { usd: number } }>({});
 
 
   useEffect(() => {

@@ -1,7 +1,7 @@
-'use client';
 
-import Link from 'next/link';
+'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface Coin {
   id: string;
@@ -15,34 +15,32 @@ interface Coin {
 export default function CoinCard({ coin }: { coin: Coin }) {
   return (
     <Link href={`/coin/${coin.id}`}>
-      <div className="bg-gray-800 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-200 h-full">
-        <div className="flex items-center space-x-4">
-          <Image
-            src={coin.image}
-            alt={coin.name}
-            width={64}
-            height={64}
-            className="w-16 h-16 object-contain rounded-full"
-          />
-          <div>
-            <h2 className="text-xl font-bold capitalize">{coin.name}</h2>
-            <p className="text-gray-400 text-sm uppercase">{coin.symbol}</p>
-          </div>
-        </div>
-
-        <div className="mt-4 text-lg font-medium">
-          💰 ${coin.current_price.toLocaleString()}
-        </div>
-        <div
-          className={`mt-1 text-sm font-semibold ${
-            coin.price_change_percentage_24h >= 0
-              ? 'text-green-400'
-              : 'text-red-400'
+     <div className="bg-gray-800 p-6 rounded-2xl shadow-lg hover:shadow-xl hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-1">
+  <div className="flex items-center gap-6">
+   <Image
+  src={coin.image}
+  alt={coin.name}
+  width={56}
+  height={56}
+  className="rounded-full border border-gray-600 p-1 bg-gray-900 object-contain"
+/>
+    <div className="flex-1">
+      <h2 className="text-2xl font-bold text-white">{coin.name}</h2>
+      <div className="text-gray-300 text-sm">
+        <p className="mb-1">Current Price:</p>
+        <p className="text-lg font-medium">${coin.current_price.toLocaleString()}</p>
+        <p
+          className={`text-sm font-semibold ${
+            coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'
           }`}
         >
           {coin.price_change_percentage_24h.toFixed(2)}%
-        </div>
+        </p>
       </div>
+    </div>
+  </div>
+</div>
+
     </Link>
   );
 }
