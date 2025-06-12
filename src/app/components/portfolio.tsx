@@ -19,7 +19,8 @@ type CoinData = {
 
 export default function Portfolio() {
   const [portfolio, setPortfolio] = useState<CoinData>({});
-  const [currentPrices, setCurrentPrices] = useState<{ [coinId: string]: number }>({});
+  const [currentPrices, setCurrentPrices] = useState<{ [coinId: string]: { usd: number } }>({});
+
 
   useEffect(() => {
     const stored = localStorage.getItem('mockTrades');

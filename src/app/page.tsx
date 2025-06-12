@@ -1,67 +1,94 @@
-// app/page.tsx
 'use client';
+
 import { useEffect, useState } from 'react';
-import { fetchTopCoins } from '@/app/lib/api';
-import CoinCard from './components/coincard';
-import Portfolio from './components/portfolio';
+import { useParams } from 'next/navigation';
+import { fetchCoinHistory } from '@/app/lib/api';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+} from 'chart.js';
+import TradePanel from '@/app/components/TradePanel';
 
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement);
 
-export default function HomePage() {
-  const [coins, setCoins] = useState<any[]>([]);
+// ✅ Proper type for CoinGecko response
+type CoinHistory = {
+  prices: [number, number][];
+};
+
+export default function CoinDetailPage() {
+  const params = useParams();
+  const id = params?.id as string;
+
+  const [history, setHistory] = useState<CoinHistory | null>(null);
 
   useEffect(() => {
-    fetchTopCoins().then(setCoins);
-  }, []);
+    if (id) {
+      fetchCoinHistory(id).then(setHistory);
+    }
+  }, [id]);
+
+  const chartData = history
+    ? {
+        labels: history.prices
+          .filter((_, i) => i % 4 === 0)
+          .map(([timestamp]) =>
+            new Date(timestamp).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })
+          ),
+        datasets: [
+          {
+            label: `${id} price (USD)`,
+            data: history.prices
+              .filter((_, i) => i % 4 === 0)
+              .map(([, price]) => price),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.3,
+            fill: true,
+          },
+        ],
+      }
+    : null;
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        labels: {
+          color: '#fff',
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: { color: '#ccc' },
+      },
+      y: {
+        ticks: { color: '#ccc' },
+      },
+    },
+  };
 
   return (
-  <main className="min-h-screen bg-gray-900 text-white p-4 lg:p-8">
-  <h1 className="text-3xl font-bold mb-8 text-center lg:text-left">🚀 Top Crypto Coins</h1>
+    <div className="max-w-5xl mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6 capitalize text-center text-white">{id}</h1>
 
-  <div className="lg:flex lg:space-x-8">
-    {/* Coins List */}
-    <div className="lg:w-2/3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {coins.map((coin, idx) => (
-          <div
-            key={idx}
-            className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-md hover:shadow-2xl transition duration-300 h-full border border-gray-700"
-          >
-            <div className="flex items-center gap-4">
-              <img
-                src={coin.image}
-                alt={coin.name}
-                className="w-16 h-16 object-contain"
-              />
-              <div>
-                <h2 className="text-xl font-semibold capitalize">{coin.name}</h2>
-                <p className="text-gray-400 text-sm uppercase">{coin.symbol}</p>
-              </div>
-            </div>
+      {chartData ? (
+        <div className="bg-gray-800 p-6 rounded-xl mb-6 shadow">
+          <Line data={chartData} options={chartOptions} />
+        </div>
+      ) : (
+        <p className="text-white text-center">Loading chart...</p>
+      )}
 
-            <div className="mt-6 text-lg font-medium">
-              💰 ${coin.current_price.toLocaleString()}
-            </div>
-            <div
-              className={`mt-1 text-base font-bold ${
-                coin.price_change_percentage_24h >= 0
-                  ? 'text-green-400'
-                  : 'text-red-400'
-              }`}
-            >
-              {coin.price_change_percentage_24h.toFixed(2)}%
-            </div>
-          </div>
-        ))}
-      </div>
+      <TradePanel coinId={id} />
     </div>
-
-    {/* Portfolio Section */}
-    <div className="lg:w-1/3 mt-10 lg:mt-0">
-      <Portfolio />
-    </div>
-  </div>
-</main>
-
-
   );
 }

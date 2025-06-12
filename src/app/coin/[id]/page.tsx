@@ -15,11 +15,16 @@ import TradePanel from '@/app/components/TradePanel';
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement);
 
+// ✅ Define correct type for CoinGecko's response
+type CoinHistory = {
+  prices: [number, number][];
+};
+
 export default function CoinDetailPage() {
   const params = useParams();
   const id = params?.id as string;
 
-  const [history, setHistory] = useState<any>(null);
+  const [history, setHistory] = useState<CoinHistory | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -30,9 +35,9 @@ export default function CoinDetailPage() {
   const chartData = history
     ? {
         labels: history.prices
-          .filter((_: any, i: number) => i % 4 === 0) // throttle labels
-          .map((p: any) =>
-            new Date(p[0]).toLocaleDateString('en-US', {
+          .filter(([,], i) => i % 4 === 0) // ✅ Avoid ESLint unused var warning
+          .map(([timestamp]) =>
+            new Date(timestamp).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
             })
@@ -41,8 +46,8 @@ export default function CoinDetailPage() {
           {
             label: `${id} price (USD)`,
             data: history.prices
-              .filter((_: any, i: number) => i % 4 === 0) // throttle data to match labels
-              .map((p: any) => p[1]),
+              .filter(([,], i) => i % 4 === 0)
+              .map(([, price]) => price),
             borderColor: '#3b82f6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.3,
